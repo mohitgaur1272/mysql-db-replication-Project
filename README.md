@@ -75,6 +75,7 @@ FLUSH PRIVILEGES;
 ## so first 
 "sudo vim signup.html"
 
+```
 <!DOCTYPE html>
 <html>
 <head>
@@ -165,7 +166,7 @@ FLUSH PRIVILEGES;
     </div>
 </body>
 </html>
-
+```
 
 ## Second 
 "sudo vim login.html"
