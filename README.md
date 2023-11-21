@@ -73,7 +73,7 @@ FLUSH PRIVILEGES;
 
 ## Now we will create all html and php file in /var/www/html/
 ## so first 
-"sudo vim signup.html"
+sudo vim signup.html
 
 ```
 <!DOCTYPE html>
@@ -169,8 +169,294 @@ FLUSH PRIVILEGES;
 ```
 
 ## Second 
-"sudo vim login.html"
+sudo vim login.html
 
+```
 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
 
+        .login-container {
+            width: 300px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin: 10px 0;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form action="login.php" method="post">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <input type="submit" value="Login" class="btn">
+        </form>
+    </div>
+</body>
+</html>
+
+```
 ## Now our 2 html main page are done and we will create database.php file for backand service connect the database
+sudo vim database.php
+
+```
+<?php
+$servername = "localhost";
+$username = "mohit"; // Replace with your MySQL username
+$password = "mohit123"; // Replace with your MySQL password
+$dbname = "test"; // Replace with your MySQL database name
+
+// Create a connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Get form data from the signup form
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST["username"];
+    $password = $_POST["password"];
+    $email = $_POST["email"];
+    $phone = $_POST["phone"];
+
+    // Insert data into the 'users' table (change 'users' to your table name)
+    $sql = "INSERT INTO users (username, password, email, phone) VALUES ('$username', '$password', '$email', '$phone')";
+
+    if ($conn->query($sql) === TRUE) {
+        echo "Registration Completed";
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+
+$conn->close();
+?>
+
+```
+## NOTE:- here some changes you will have to do this file that I presented this sign (//)  in database.php file.
+
+### now we will create index.php for signup.html file because this file will help to signup.html for backend work.
+"sudo vim index.php"
+
+```
+<?php
+
+session_start();
+
+if (isset($_SESSION["user_id"])) {
+
+    $mysqli = require __DIR__ . "/database.php";
+
+    $sql = "SELECT * FROM user
+            WHERE id = {$_SESSION["user_id"]}";
+
+    $result = $mysqli->query($sql);
+
+    $user = $result->fetch_assoc();
+}
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+</head>
+<body>
+
+    <h1>Home</h1>
+
+    <?php if (isset($user)): ?>
+
+        <p>Hello <?= htmlspecialchars($user["name"]) ?></p>
+
+        <p><a href="logout.php">Log out</a></p>
+
+    <?php else: ?>
+
+        <p><a href="login.html">Log in</a> or <a href="signup.html">sign up</a></p>
+
+    <?php endif; ?>
+
+</body>
+</html>
+```
+## NOTE:- now we will create login.php file for login.html that will help login.html file for backend word and match the data in database.
+"sudo vim login.php"
+```
+<?php
+// This is a simple example and should not be used in a production environment.
+// In a real application, you should use secure practices like password hashing and validation.
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // Retrieve user input from the login form
+    $username = $_POST["username"];
+    $password = $_POST["password"];
+
+    // You should replace these values with actual user data and validation logic.
+    $validUsername = "mohit"; // Replace with a valid username
+    $validPassword = "mohit123"; // Replace with a valid password
+
+    // Check if the entered username and password match the valid values
+    if ($username === $validUsername && $password === $validPassword) {
+        // Authentication successful
+        // You can set a session variable here to track the user's login status.
+        session_start();
+        $_SESSION["user"] = $username;
+        header("Location: home.php"); // Redirect to the home page after successful login
+        exit;
+    } else {
+        // Authentication failed
+        echo "Invalid username or password. Please try again.";
+    }
+}
+?>
+```
+### If our database matches username and password of user so then user redirect our home.php file or not so the user will see "Invalid username or password. Please try again"
+"sudo vim home.php"
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beautiful Home Page</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f8f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 15px 0;
+            text-align: center;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #007BFF;
+            padding: 10px 0;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        nav a:hover {
+            background-color: #0056b3;
+        }
+
+        .main-content {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 15px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Welcome to Our new Website</h1>
+    </header>
+
+    <nav>
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#">Services</a>
+        <a href="#">Contact</a>
+    </nav>
+
+    <div class="main-content">
+        <h2>Home Page Content Goes Here</h2>
+        <p>This is a very usefull website.</p>
+        <!-- Your main content goes here -->
+    </div>
+
+    <footer>
+        &copy; 2023 Your Beautiful Website Name
+    </footer>
+
+</body>
+</html>
+
+```
